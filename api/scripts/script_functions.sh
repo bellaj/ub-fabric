@@ -233,6 +233,7 @@ InitNettingLedger() {
     echo
 }
 
+InitChannelAccounts() {
     CHANNEL=$1
 
     ACCT1=`jq -r .channelBankMapping.${CHANNEL}[0] ${NETWORK_REFERENCE_FILE}`
