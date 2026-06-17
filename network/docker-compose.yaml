@@ -128,7 +128,7 @@ services:
 
   couchdb-masgsgsg:
     container_name: couchdb-masgsgsg
-    image: hyperledger/fabric-couchdb:x86_64-1.0.1
+    image: hyperledger/fabric-orderer:latest
     ports:
       - 5984:5984
     environment:
@@ -226,7 +226,7 @@ services:
 
   couchdb-bofasg2x:
     container_name: couchdb-bofasg2x
-    image: hyperledger/fabric-couchdb:x86_64-1.0.1
+    image: hyperledger/fabric-orderer:latest
     ports:
       - 6984:5984
     environment:
