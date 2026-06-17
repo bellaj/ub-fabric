@@ -39,6 +39,10 @@
                 "server-hostname": "peer0.bofasg2x.example.com",
                 "tls_cacerts": "../../../network/crypto-config/peerOrganizations/bofasg2x.example.com/peers/peer0.bofasg2x.example.com/tls/ca.crt"
             },
+            "admin": {
+                "key": "../../../network/crypto-config/peerOrganizations/bofasg2x.example.com/users/Admin@bofasg2x.example.com/msp/keystore",
+                "cert": "../../../network/crypto-config/peerOrganizations/bofasg2x.example.com/users/Admin@bofasg2x.example.com/msp/signcerts"
+            },
             "orgPeers": [
                 "FabricNx03:8051"
             ],
@@ -55,6 +59,10 @@
                 "events": "grpc://FabricNx04:9053",
                 "server-hostname": "peer0.chassgsg.example.com",
                 "tls_cacerts": "../../../network/crypto-config/peerOrganizations/chassgsg.example.com/peers/peer0.chassgsg.example.com/tls/ca.crt"
+            },
+            "admin": {
+                "key": "../../../network/crypto-config/peerOrganizations/chassgsg.example.com/users/Admin@chassgsg.example.com/msp/keystore",
+                "cert": "../../../network/crypto-config/peerOrganizations/chassgsg.example.com/users/Admin@chassgsg.example.com/msp/signcerts"
             },
             "orgPeers": [
                 "FabricNx04:9051"

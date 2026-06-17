@@ -63,11 +63,17 @@ RestartNodeJS() {
 #**********************************************
 
 Enroll() {
-    echo "POST - Enrolling ${ORG_USER} on ${ORG_NAME}"
+    EnrollOrg "${ORG_NAME}" "${ORG_USER}"
+}
+
+EnrollOrg() {
+    local org=$1
+    local user=$2
+    echo "POST - Enrolling ${user} on ${org}"
     RESP=$(curl -s -X POST \
         http://localhost:8080/api/users \
         -H "content-type: application/x-www-form-urlencoded" \
-        -d "username=${ORG_USER}&orgName=${ORG_NAME}")
+        -d "username=${user}&orgName=${org}")
     echo "Enroll Response: ${RESP}"
     echo
     echo
@@ -78,19 +84,22 @@ Enroll() {
 # FUNCTIONS FOR INSTALLATION/INSTANTIATION
 #**********************************************
 
-Install() {
-    CHAINCODE=$1
+InstallOn() {
+    local org=$1
+    local peer=$2
+    local user=$3
+    local chaincode=$4
 
-    echo "POST install chaincode ${CHAINCODE} version ${VERSION} on ${ORG_NAME}/${ORG_USER} with ${ORG_PEER}"
+    echo "POST install chaincode ${chaincode} version ${VERSION} on ${org}/${user} with ${peer}"
     RESP=$(curl -s -X POST \
         http://localhost:8080/api/chaincodes \
         -H "content-type: application/json" \
         -d "{
-        \"username\" : \"${ORG_USER}\",
-        \"orgname\" : \"${ORG_NAME}\",
-        \"peers\" : [\"${ORG_PEER}\"],
-        \"chaincodeName\":\"${CHAINCODE}_cc\",
-        \"chaincodePath\":\"ubin-fabric/chaincode/${CHAINCODE}\",
+        \"username\" : \"${user}\",
+        \"orgname\" : \"${org}\",
+        \"peers\" : [\"${peer}\"],
+        \"chaincodeName\":\"${chaincode}_cc\",
+        \"chaincodePath\":\"ubin-fabric/chaincode/${chaincode}\",
         \"chaincodeVersion\":\"${VERSION}\"
     }")
     echo "Installation response:"
@@ -99,21 +108,30 @@ Install() {
     echo
 }
 
+Install() {
+    InstallOn "${ORG_NAME}" "${ORG_PEER}" "${ORG_USER}" "$1"
+}
+
 InstantiateBilateral() {
     CHANNEL=$1
 
-    SetPeers ${CHANNEL}
+    PEER0=`jq -r .channelMapping.${CHANNEL}[0] ${NETWORK_REFERENCE_FILE}`
+    PEER1=`jq -r .channelMapping.${CHANNEL}[1] ${NETWORK_REFERENCE_FILE}`
 
-    echo "PEER: $ORG_PEER"
+    echo
+    echo "Channel peers:"
+    echo ${PEER0}
+    echo ${PEER1}
+    echo
 
-    echo "POST instantiate chaincode on ${CHANNEL} using ${ORG_NAME}/${ORG_USER}"
+    echo "POST instantiate bilateral on ${CHANNEL} using ${ORG1_NAME}/${ORG1_BIC}"
     RESP=$(curl -s -X POST \
         http://localhost:8080/api/channels/${CHANNEL}/chaincodes \
         -H "content-type: application/json" \
         -d "{
-        \"username\" : \"${ORG_USER}\",
-        \"orgname\" : \"${ORG_NAME}\",
-        \"peers\" : [\"${ORG_PEER}\"],
+        \"username\" : \"${ORG1_BIC}\",
+        \"orgname\" : \"${ORG1_NAME}\",
+        \"peers\" : [\"${PEER0}\", \"${PEER1}\"],
         \"functionName\" : \"init\",
         \"args\" : [],
         \"chaincodeName\":\"bilateralchannel_cc\",
@@ -126,27 +144,34 @@ InstantiateBilateral() {
     echo
 }
 
-InstantiateMultilateral() {
-    CHANNEL=$1
+InstantiateMultilateralAs() {
+    local org=$1
+    local user=$2
+    local peer=$3
+    local channel=$4
 
-    echo "POST instantiate chaincode on ${CHANNEL} using ${ORG_NAME}/${ORG_USER} with ${ORG_PEER}"
+    echo "POST instantiate chaincode on ${channel} using ${org}/${user} with ${peer}"
     RESP=$(curl -s -X POST \
-        http://localhost:8080/api/channels/${CHANNEL}/chaincodes \
+        http://localhost:8080/api/channels/${channel}/chaincodes \
         -H "content-type: application/json" \
         -d "{
-        \"username\" : \"${ORG_USER}\",
-        \"orgname\" : \"${ORG_NAME}\",
-        \"peers\" : [\"${ORG_PEER}\"],
+        \"username\" : \"${user}\",
+        \"orgname\" : \"${org}\",
+        \"peers\" : [\"${peer}\"],
         \"functionName\" : \"init\",
         \"args\" : [],
-        \"chaincodeName\":\"${CHANNEL}_cc\",
-        \"chaincodePath\":\"ubin-fabric/chaincode/${CHANNEL}\",
+        \"chaincodeName\":\"${channel}_cc\",
+        \"chaincodePath\":\"ubin-fabric/chaincode/${channel}\",
         \"chaincodeVersion\":\"${VERSION}\"
     }")
     echo "Instantiation response:"
     echo "$RESP"
     echo
     echo
+}
+
+InstantiateMultilateral() {
+    InstantiateMultilateralAs "${ORG_NAME}" "${ORG_USER}" "${ORG_PEER}" "$1"
 }
 
 Upgrade() {
@@ -188,27 +213,34 @@ Upgrade() {
 # FUNCTIONS FOR ASSET INITIALIZATION
 #**********************************************
 
-InitAccount() {
-    ACCOUNT=$1
-    AMOUNT=$2
-    CHANNEL=$3
+InitAccountOn() {
+    local org=$1
+    local user=$2
+    local account=$3
+    local amount=$4
+    local channel=$5
 
-    SetPeers ${CHANNEL}
+    PEER0=`jq -r .channelMapping.${channel}[0] ${NETWORK_REFERENCE_FILE}`
+    PEER1=`jq -r .channelMapping.${channel}[1] ${NETWORK_REFERENCE_FILE}`
 
-    echo "POST - initAccount ${ACCOUNT} with ${AMOUNT} ${CURRENCY} in ${CHANNEL}"
+    echo "POST - initAccount ${account} with ${amount} ${CURRENCY} in ${channel} as ${org}/${user}"
     RESP=$(curl -s -X POST \
-        http://localhost:8080/api/channels/${CHANNEL}/chaincodes/bilateralchannel_cc \
+        http://localhost:8080/api/channels/${channel}/chaincodes/bilateralchannel_cc \
         -H "content-type: application/json" \
         -d "{
-        \"username\" : \"${ORG_USER}\",
-        \"orgname\" : \"${ORG_NAME}\",
-        \"peers\": [\"${CHANNEL_PEER0}\", \"${CHANNEL_PEER1}\"],
+        \"username\" : \"${user}\",
+        \"orgname\" : \"${org}\",
+        \"peers\": [\"${PEER0}\", \"${PEER1}\"],
         \"fcn\":\"initAccount\",
-        \"args\":[\"${ACCOUNT}\",\"${CURRENCY}\",\"${AMOUNT}\",\"NORMAL\"] 
+        \"args\":[\"${account}\",\"${CURRENCY}\",\"${amount}\",\"NORMAL\"] 
     }")
     echo "InitAccount response:"
     echo "$RESP"
     echo
+}
+
+InitAccount() {
+    InitAccountOn "${ORG_NAME}" "${ORG_USER}" "$1" "$2" "$3"
 }
 
 InitNettingLedger() {
@@ -217,13 +249,13 @@ InitNettingLedger() {
     PEER1=`jq -r .channelMapping.${CHANNEL}[1] ${NETWORK_REFERENCE_FILE}`
     PEER2=`jq -r .channelMapping.${CHANNEL}[2] ${NETWORK_REFERENCE_FILE}`
 
-    echo "POST - initLedger on ${CHANNEL}"
+    echo "POST - initLedger on ${CHANNEL} as ${ORG0_NAME}/${ORG0_BIC}"
     RESP=$(curl -s -X POST \
         http://localhost:8080/api/channels/${CHANNEL}/chaincodes/nettingchannel_cc \
         -H "content-type: application/json" \
         -d "{
-        \"username\" : \"${ORG_USER}\",
-        \"orgname\" : \"${ORG_NAME}\",
+        \"username\" : \"${ORG0_BIC}\",
+        \"orgname\" : \"${ORG0_NAME}\",
         \"peers\": [\"${PEER0}\", \"${PEER1}\", \"${PEER2}\"],
         \"fcn\":\"initLedger\",
         \"args\":[]
@@ -239,8 +271,8 @@ InitChannelAccounts() {
     ACCT1=`jq -r .channelBankMapping.${CHANNEL}[0] ${NETWORK_REFERENCE_FILE}`
     ACCT2=`jq -r .channelBankMapping.${CHANNEL}[1] ${NETWORK_REFERENCE_FILE}`
 
-    InitAccount ${ACCT1} 0 ${CHANNEL}
-    InitAccount ${ACCT2} 0 ${CHANNEL}
+    InitAccountOn "${ORG1_NAME}" "${ORG1_BIC}" "${ACCT1}" 0 "${CHANNEL}"
+    InitAccountOn "${ORG1_NAME}" "${ORG1_BIC}" "${ACCT2}" 0 "${CHANNEL}"
 }
 
 #**********************************************

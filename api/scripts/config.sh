@@ -48,3 +48,9 @@ ORG_ACCT=${ORG_USER}
 ORG0_BIC=`jq -r .networkConfig.${ORG0_NAME}.bic ${NETWORK_CONFIG_FILE}`
 ORG1_BIC=`jq -r .networkConfig.${ORG1_NAME}.bic ${NETWORK_CONFIG_FILE}`
 ORG2_BIC=`jq -r .networkConfig.${ORG2_NAME}.bic ${NETWORK_CONFIG_FILE}`
+
+# Single-VM orchestration uses the MAS config file for all org peer addresses.
+MAS_CONFIG=${NETWORK_CONFIG_PATH}/network-config_masgsgsg.json
+ORG0_PEER=`jq -r .networkConfig.org0.orgPeers[0] ${MAS_CONFIG}`
+ORG1_PEER=`jq -r .networkConfig.org1.orgPeers[0] ${MAS_CONFIG}`
+ORG2_PEER=`jq -r .networkConfig.org2.orgPeers[0] ${MAS_CONFIG}`
