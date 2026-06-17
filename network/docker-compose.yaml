@@ -24,7 +24,7 @@ services:
       - ORDERER_GENERAL_TLS_ENABLED=false
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peermasgsgsg/tls/ca.crt, /etc/hyperledger/crypto/peerbofasg2x/tls/ca.crt, /etc/hyperledger/crypto/peerchassgsg/tls/ca.crt, /etc/hyperledger/crypto/peercitisgsg/tls/ca.crt, /etc/hyperledger/crypto/peercsfbsgsx/tls/ca.crt, /etc/hyperledger/crypto/peerdbsssgsg/tls/ca.crt, /etc/hyperledger/crypto/peerhsbcsgsg/tls/ca.crt, /etc/hyperledger/crypto/peermtbcsgsg/tls/ca.crt, /etc/hyperledger/crypto/peerocbcsgsg/tls/ca.crt, /etc/hyperledger/crypto/peerscblsgsg/tls/ca.crt, /etc/hyperledger/crypto/peeruobvsgsg/tls/ca.crt, /etc/hyperledger/crypto/peerxsimsgsg/tls/ca.crt]
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peermasgsgsg/tls/ca.crt, /etc/hyperledger/crypto/peerbofasg2x/tls/ca.crt]
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     ports:
@@ -34,16 +34,6 @@ services:
         - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/crypto/orderer
         - ./crypto-config/peerOrganizations/masgsgsg.example.com/peers/peer0.masgsgsg.example.com/:/etc/hyperledger/crypto/peermasgsgsg
         - ./crypto-config/peerOrganizations/bofasg2x.example.com/peers/peer0.bofasg2x.example.com/:/etc/hyperledger/crypto/peerbofasg2x
-        - ./crypto-config/peerOrganizations/chassgsg.example.com/peers/peer0.chassgsg.example.com/:/etc/hyperledger/crypto/peerchassgsg
-        - ./crypto-config/peerOrganizations/citisgsg.example.com/peers/peer0.citisgsg.example.com/:/etc/hyperledger/crypto/peercitisgsg
-        - ./crypto-config/peerOrganizations/csfbsgsx.example.com/peers/peer0.csfbsgsx.example.com/:/etc/hyperledger/crypto/peercsfbsgsx
-        - ./crypto-config/peerOrganizations/dbsssgsg.example.com/peers/peer0.dbsssgsg.example.com/:/etc/hyperledger/crypto/peerdbsssgsg
-        - ./crypto-config/peerOrganizations/hsbcsgsg.example.com/peers/peer0.hsbcsgsg.example.com/:/etc/hyperledger/crypto/peerhsbcsgsg
-        - ./crypto-config/peerOrganizations/mtbcsgsg.example.com/peers/peer0.mtbcsgsg.example.com/:/etc/hyperledger/crypto/peermtbcsgsg
-        - ./crypto-config/peerOrganizations/ocbcsgsg.example.com/peers/peer0.ocbcsgsg.example.com/:/etc/hyperledger/crypto/peerocbcsgsg
-        - ./crypto-config/peerOrganizations/scblsgsg.example.com/peers/peer0.scblsgsg.example.com/:/etc/hyperledger/crypto/peerscblsgsg
-        - ./crypto-config/peerOrganizations/uobvsgsg.example.com/peers/peer0.uobvsgsg.example.com/:/etc/hyperledger/crypto/peeruobvsgsg
-        - ./crypto-config/peerOrganizations/xsimsgsg.example.com/peers/peer0.xsimsgsg.example.com/:/etc/hyperledger/crypto/peerxsimsgsg
     networks:
       fabric:
         aliases:
