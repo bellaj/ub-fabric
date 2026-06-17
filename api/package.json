@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "nodemon app.js",
-    "postinstall": "node -e \"console.log('Dependencies installed. Use Node 16 if native modules fail on newer versions.')\""
+    "postinstall": "node -e \"try{require('child_process').execSync('npm run install',{cwd:'node_modules/grpc',stdio:'inherit'})}catch(e){process.exit(0)}\""
   },
   "author": "Accenture",
   "license": "Apache-2.0",
@@ -21,8 +21,8 @@
     "cors": "^2.8.3",
     "express": "^4.15.2",
     "express-session": "^1.15.2",
-    "fabric-ca-client": "^1.0.0",
-    "fabric-client": "^1.0.0",
+    "fabric-ca-client": "1.4.20",
+    "fabric-client": "1.4.20",
     "fs-extra": "^2.0.0",
     "log4js": "^0.6.38",
     "nodemon": "^1.9.2",

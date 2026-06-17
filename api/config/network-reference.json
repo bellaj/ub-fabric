@@ -1,7 +1,8 @@
 {
     "bankOrgMapping": {
         "MASGSGSG": "org0",
-        "BOFASG2X": "org1"
+        "BOFASG2X": "org1",
+        "CHASSGSG": "org2"
     },
     "regulators": [
         "MASGSGSG"
@@ -21,8 +22,18 @@
         ],
         "nettingchannel": [
             "FabricNx02:7051",
-            "FabricNx03:8051"
+            "FabricNx03:8051",
+            "FabricNx04:9051"
+        ],
+        "bofasg2xchassgsgchannel": [
+            "FabricNx03:8051",
+            "FabricNx04:9051"
         ]
     },
-    "channelBankMapping": {}
+    "channelBankMapping": {
+        "bofasg2xchassgsgchannel": [
+            "BOFASG2X",
+            "CHASSGSG"
+        ]
+    }
 }

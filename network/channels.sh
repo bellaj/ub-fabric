@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Create and join channels for the 2-org network (MAS + BOFA).
+# MAS + 2 banks: funding, netting, and BOFA–CHASSGSG bilateral channel.
 set -euo pipefail
 
 REGULATOR=masgsgsg
-BANK=bofasg2x
-MULTILATERAL_CHANNELS=( fundingchannel nettingchannel )
+BANKS=( bofasg2x chassgsg )
+BILATERAL=bofasg2xchassgsgchannel
+MULTILATERAL=( fundingchannel nettingchannel )
 CHANNEL_SCRIPT_DIR=/etc/hyperledger/configtx
 
 find_peer_container() {
@@ -12,13 +13,15 @@ find_peer_container() {
 }
 
 mas_container="$(find_peer_container "${REGULATOR}")"
-bofa_container="$(find_peer_container "${BANK}")"
+bofa_container="$(find_peer_container "bofasg2x")"
+chase_container="$(find_peer_container "chassgsg")"
 
 echo
-echo "---------- 2-org peer containers ----------"
-echo " MAS (${REGULATOR}) : ${mas_container:-not found}"
-echo " BOFA (${BANK})     : ${bofa_container:-not found}"
-echo "-------------------------------------------"
+echo "---------- peer containers ----------"
+echo " MAS      : ${mas_container:-not found}"
+echo " BOFA     : ${bofa_container:-not found}"
+echo " CHASSGSG : ${chase_container:-not found}"
+echo "-------------------------------------"
 echo
 
 if [ -z "${mas_container}" ]; then
@@ -26,20 +29,24 @@ if [ -z "${mas_container}" ]; then
     exit 1
 fi
 
-echo "Creating multilateral channels on MAS peer..."
+echo "Creating channels on MAS peer..."
 docker exec "${mas_container}" bash "${CHANNEL_SCRIPT_DIR}/create-channel.sh"
 echo
 
-echo "Joining MAS to ${MULTILATERAL_CHANNELS[*]}..."
+echo "Joining MAS to ${MULTILATERAL[*]}..."
 docker exec "${mas_container}" bash "${CHANNEL_SCRIPT_DIR}/join-channel.sh" \
-    "${REGULATOR}" "${MULTILATERAL_CHANNELS[@]}"
+    "${REGULATOR}" "${MULTILATERAL[@]}"
 
 if [ -n "${bofa_container}" ]; then
-    echo "Joining BOFA to ${MULTILATERAL_CHANNELS[*]}..."
+    echo "Joining BOFA to ${BILATERAL} ${MULTILATERAL[1]}..."
     docker exec "${bofa_container}" bash "${CHANNEL_SCRIPT_DIR}/join-channel.sh" \
-        "${BANK}" "${MULTILATERAL_CHANNELS[@]}"
-else
-    echo "BOFA peer not found; skipping BOFA channel join."
+        bofasg2x "${BILATERAL}" "${MULTILATERAL[1]}"
+fi
+
+if [ -n "${chase_container}" ]; then
+    echo "Joining CHASSGSG to ${BILATERAL} ${MULTILATERAL[1]}..."
+    docker exec "${chase_container}" bash "${CHANNEL_SCRIPT_DIR}/join-channel.sh" \
+        chassgsg "${BILATERAL}" "${MULTILATERAL[1]}"
 fi
 
 echo "Channel setup complete."

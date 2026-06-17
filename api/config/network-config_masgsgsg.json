@@ -21,7 +21,8 @@
             },
             "channels": [
                 "fundingchannel",
-                "nettingchannel"
+                "nettingchannel",
+                "bofasg2xchassgsgchannel"
             ],
             "orgPeers": [
                 "FabricNx02:7051"
@@ -41,7 +42,26 @@
             "orgPeers": [
                 "FabricNx03:8051"
             ],
-            "orgChannels": {}
+            "orgChannels": {
+                "org2": "bofasg2xchassgsgchannel"
+            }
+        },
+        "org2": {
+            "bic": "CHASSGSG",
+            "mspid": "chassgsgMSP",
+            "ca": "http://FabricNx04:9054",
+            "peer0": {
+                "requests": "grpc://FabricNx04:9051",
+                "events": "grpc://FabricNx04:9053",
+                "server-hostname": "peer0.chassgsg.example.com",
+                "tls_cacerts": "../../../network/crypto-config/peerOrganizations/chassgsg.example.com/peers/peer0.chassgsg.example.com/tls/ca.crt"
+            },
+            "orgPeers": [
+                "FabricNx04:9051"
+            ],
+            "orgChannels": {
+                "org1": "bofasg2xchassgsgchannel"
+            }
         }
     }
 }

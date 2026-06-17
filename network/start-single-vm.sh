@@ -7,7 +7,9 @@ ADVERTISE_ADDR="${UBIN_SWARM_ADDR:-}"
 
 echo "=== Ubin Fabric single-VM startup ==="
 
-"${SCRIPT_DIR}/setup-hosts.sh"
+if ! getent hosts FabricNx02 >/dev/null 2>&1; then
+  "${SCRIPT_DIR}/setup-hosts.sh"
+fi
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker is required. Run fabric-setup.sh first."
@@ -30,13 +32,17 @@ docker pull couchdb:2.3.1
 docker pull hyperledger/fabric-ccenv:2.5
 docker pull hyperledger/fabric-baseos:2.5
 
+echo "Building custom chaincode images (libltdl for vendored pkcs11)..."
+docker build -t ubin-fabric-ccenv:2.5 -f docker/ccenv.Dockerfile docker/
+docker build -t ubin-fabric-baseos:2.5 -f docker/baseos.Dockerfile docker/
+
 cd "${SCRIPT_DIR}"
 docker stack rm ubin 2>/dev/null || true
 sleep 8
 docker stack deploy -c docker-compose.yaml ubin
 
-echo "Waiting 120s for containers to start..."
-sleep 120
+echo "Waiting 180s for containers to start..."
+sleep 180
 
 docker service ls
 docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'

@@ -33,7 +33,6 @@ SetPeers() {
 
 RestartNodeJS() {
     STATE=`ps -ef | grep "app.js" | grep -v grep | wc -l`
-    PID=`ps -ef | grep "app.js" | grep -v grep |awk 'NR==1{print $2}'`
     if [ "${STATE}" -ne 0 ] ; then
         echo "NodeJS currently running. Shutting down..."
         pm2 stop all
@@ -41,8 +40,19 @@ RestartNodeJS() {
     else
         echo "NodeJS server is not running"
     fi
+
+    if [ ! -f ecosystem.config.js ]; then
+        cp ecosystem.config-template.js ecosystem.config.js
+    fi
+
+    if [ ! -f "../node_modules/grpc/src/node/extension_binary/node-v93-linux-$(uname -m | sed 's/aarch64/arm64/')-glibc/grpc_node.node" ] \
+       && [ ! -f "../node_modules/grpc/src/node/extension_binary/node-v93-linux-x64-glibc/grpc_node.node" ]; then
+        echo "Building grpc native module..."
+        (cd ../node_modules/grpc && npm run install)
+    fi
+
     echo
-    echo "Starting NodeJS and waiting 5 seconds..."
+    echo "Starting NodeJS and waiting 10 seconds..."
     pm2 start ecosystem.config.js
     sleep 10
 }

@@ -12,6 +12,10 @@ ORG1_NAME=org1
 ORG1_HOST=FabricNx03
 ORG1_CONFIG=network-config_bofasg2x
 
+ORG2_NAME=org2
+ORG2_HOST=FabricNx04
+ORG2_CONFIG=network-config_chassgsg
+
 jq --version > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Please Install 'jq' https://stedolan.github.io/jq/ to execute this script"
@@ -19,37 +23,19 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 2-org network: MAS on FabricNx02, BOFA on FabricNx03.
-# Override with UBIN_ORG=org0|org1 if hostname does not match.
 if [ -n "${UBIN_ORG:-}" ]; then
     case ${UBIN_ORG} in
-        ${ORG0_NAME})
-            NETWORK_CONFIG=${ORG0_CONFIG}
-            ORG_NAME=${ORG0_NAME}
-            ;;
-        ${ORG1_NAME})
-            NETWORK_CONFIG=${ORG1_CONFIG}
-            ORG_NAME=${ORG1_NAME}
-            ;;
-        *)
-            echo "Invalid UBIN_ORG (${UBIN_ORG}). Use org0 (MAS) or org1 (BOFA)."
-            exit 1
-            ;;
+        ${ORG0_NAME}) NETWORK_CONFIG=${ORG0_CONFIG}; ORG_NAME=${ORG0_NAME} ;;
+        ${ORG1_NAME}) NETWORK_CONFIG=${ORG1_CONFIG}; ORG_NAME=${ORG1_NAME} ;;
+        ${ORG2_NAME}) NETWORK_CONFIG=${ORG2_CONFIG}; ORG_NAME=${ORG2_NAME} ;;
+        *) echo "Invalid UBIN_ORG (${UBIN_ORG}). Use org0, org1, or org2."; exit 1 ;;
     esac
 else
     case $(hostname) in
-        ${ORG0_HOST})
-            NETWORK_CONFIG=${ORG0_CONFIG}
-            ORG_NAME=${ORG0_NAME}
-            ;;
-        ${ORG1_HOST})
-            NETWORK_CONFIG=${ORG1_CONFIG}
-            ORG_NAME=${ORG1_NAME}
-            ;;
-        *)
-            echo "Invalid Hostname ($(hostname)). Run network/setup-hosts.sh, set hostname to FabricNx02, or export UBIN_ORG=org0."
-            exit 1
-            ;;
+        ${ORG0_HOST}) NETWORK_CONFIG=${ORG0_CONFIG}; ORG_NAME=${ORG0_NAME} ;;
+        ${ORG1_HOST}) NETWORK_CONFIG=${ORG1_CONFIG}; ORG_NAME=${ORG1_NAME} ;;
+        ${ORG2_HOST}) NETWORK_CONFIG=${ORG2_CONFIG}; ORG_NAME=${ORG2_NAME} ;;
+        *) echo "Invalid Hostname ($(hostname)). Run setup-hosts.sh, set hostname FabricNx02, or export UBIN_ORG=org0."; exit 1 ;;
     esac
 fi
 
@@ -61,3 +47,4 @@ ORG_ACCT=${ORG_USER}
 
 ORG0_BIC=`jq -r .networkConfig.${ORG0_NAME}.bic ${NETWORK_CONFIG_FILE}`
 ORG1_BIC=`jq -r .networkConfig.${ORG1_NAME}.bic ${NETWORK_CONFIG_FILE}`
+ORG2_BIC=`jq -r .networkConfig.${ORG2_NAME}.bic ${NETWORK_CONFIG_FILE}`

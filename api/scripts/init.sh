@@ -1,5 +1,5 @@
 #!/bin/bash
-# Initialise API and chaincodes for the 2-org network (MAS + BOFA).
+# MAS + 2 banks: funding, netting, and one bilateral channel (BOFA–CHASSGSG).
 
 start=`date +%s`
 echo "1" > cc_version.txt
@@ -18,7 +18,7 @@ mkdir -p ../logs
 RestartNodeJS
 
 echo
-echo "---------------- 2-ORG CONFIGURATION ----------------"
+echo "---------------- 3-ORG CONFIGURATION ----------------"
 echo " NAME: ${ORG_NAME}"
 echo " USER: ${ORG_USER}"
 echo " PEER: ${ORG_PEER}"
@@ -33,9 +33,12 @@ Install nettingchannel
 
 if [ "${ORG_NAME}" = "${REGULATOR_ORG}" ]; then
     sleep 20
-    echo "Instantiating multilateral channels (funding + netting)..."
+    echo "Instantiating chaincodes on MAS..."
     InstantiateMultilateral fundingchannel
     InstantiateMultilateral nettingchannel
+    InstantiateBilateral bofasg2xchassgsgchannel
+    sleep 10
+    InitChannelAccounts bofasg2xchassgsgchannel
 fi
 
 echo "Enabling ping cron job"

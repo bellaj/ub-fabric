@@ -1,6 +1,6 @@
 #
-# 2-org single-VM Docker Swarm stack: orderer + MAS (masgsgsg) + BOFA (bofasg2x).
-# Hostnames FabricNx01–03 are mapped via network/setup-hosts.sh.
+# Single-VM Docker Swarm: orderer + MAS + BOFA + CHASSGSG (2 banks + regulator).
+# Hostnames FabricNx01–04 via network/setup-hosts.sh.
 #
 
 version: '3.2'
@@ -24,7 +24,7 @@ services:
       - ORDERER_GENERAL_TLS_ENABLED=false
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peermasgsgsg/tls/ca.crt, /etc/hyperledger/crypto/peerbofasg2x/tls/ca.crt]
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peermasgsgsg/tls/ca.crt, /etc/hyperledger/crypto/peerbofasg2x/tls/ca.crt, /etc/hyperledger/crypto/peerchassgsg/tls/ca.crt]
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     ports:
@@ -34,6 +34,7 @@ services:
         - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/crypto/orderer
         - ./crypto-config/peerOrganizations/masgsgsg.example.com/peers/peer0.masgsgsg.example.com/:/etc/hyperledger/crypto/peermasgsgsg
         - ./crypto-config/peerOrganizations/bofasg2x.example.com/peers/peer0.bofasg2x.example.com/:/etc/hyperledger/crypto/peerbofasg2x
+        - ./crypto-config/peerOrganizations/chassgsg.example.com/peers/peer0.chassgsg.example.com/:/etc/hyperledger/crypto/peerchassgsg
     networks:
       fabric:
         aliases:
@@ -90,7 +91,7 @@ services:
       - CORE_PEER_ID=peer0.masgsgsg.example.com
       - CORE_PEER_ADDRESS=peer0.masgsgsg.example.com:7051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-      - CORE_CHAINCODE_ADDRESS=0.0.0.0:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.masgsgsg.example.com:7051
@@ -102,6 +103,9 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb-masgsgsg:5984
       - CORE_CHAINCODE_STARTUPTIMEOUT=600s
       - CORE_CHAINCODE_DEPLOYTIMEOUT=600s
+      - CORE_CHAINCODE_EXECUTETIMEOUT=600s
+      - CORE_CHAINCODE_BUILDER=ubin-fabric-ccenv:2.5
+      - CORE_CHAINCODE_GOLANG_RUNTIME=ubin-fabric-baseos:2.5
       - CORE_PEER_TLS_ENABLED=false
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
@@ -191,7 +195,7 @@ services:
       - CORE_PEER_ID=peer0.bofasg2x.example.com
       - CORE_PEER_ADDRESS=peer0.bofasg2x.example.com:7051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-      - CORE_CHAINCODE_ADDRESS=0.0.0.0:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.masgsgsg.example.com:7051
@@ -203,6 +207,9 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb-bofasg2x:5984
       - CORE_CHAINCODE_STARTUPTIMEOUT=600s
       - CORE_CHAINCODE_DEPLOYTIMEOUT=600s
+      - CORE_CHAINCODE_EXECUTETIMEOUT=600s
+      - CORE_CHAINCODE_BUILDER=ubin-fabric-ccenv:2.5
+      - CORE_CHAINCODE_GOLANG_RUNTIME=ubin-fabric-baseos:2.5
       - CORE_PEER_TLS_ENABLED=false
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
@@ -251,10 +258,10 @@ services:
 ###############################################
 # CHASSGSG organization
 ###############################################
-  
+
   ca-chassgsg:
     container_name: ca.chassgsg.example.com
-    image: hyperledger/fabric-peer:2.5.12
+    image: hyperledger/fabric-ca:1.5
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.chassgsg.example.com
@@ -278,11 +285,11 @@ services:
         condition: on-failure
         max_attempts: 1
       placement:
-        constraints: [node.hostname == FabricNx04]
+        constraints: [node.role == manager]
 
   peer0-chassgsg:
     container_name: peer0.chassgsg.example.com
-    image: hyperledger/fabric-ca:1.5
+    image: hyperledger/fabric-peer:2.5.12
     environment:
       - CORE_LOGGING_PEER=debug
       - CORE_CHAINCODE_LOGGING_LEVEL=DEBUG
@@ -290,6 +297,12 @@ services:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_PEER_ID=peer0.chassgsg.example.com
       - CORE_PEER_ADDRESS=peer0.chassgsg.example.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.masgsgsg.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.chassgsg.example.com:7051
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=ubin_fabric
       - CORE_PEER_LOCALMSPID=chassgsgMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/crypto/peer/msp
@@ -297,6 +310,9 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb-chassgsg:5984
       - CORE_CHAINCODE_STARTUPTIMEOUT=600s
       - CORE_CHAINCODE_DEPLOYTIMEOUT=600s
+      - CORE_CHAINCODE_EXECUTETIMEOUT=600s
+      - CORE_CHAINCODE_BUILDER=ubin-fabric-ccenv:2.5
+      - CORE_CHAINCODE_GOLANG_RUNTIME=ubin-fabric-baseos:2.5
       - CORE_PEER_TLS_ENABLED=false
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
@@ -312,9 +328,6 @@ services:
       - ./crypto-config/peerOrganizations/chassgsg.example.com/peers/peer0.chassgsg.example.com/:/etc/hyperledger/crypto/peer
       - ./crypto-config/peerOrganizations/chassgsg.example.com/users:/etc/hyperledger/crypto/msp/users
       - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/:/etc/hyperledger/crypto/orderer
-    depends_on:
-      - orderer.example.com
-      - couchdb-chassgsg
     networks:
       fabric:
         aliases:
@@ -325,7 +338,7 @@ services:
         condition: on-failure
         max_attempts: 1
       placement:
-        constraints: [node.hostname == FabricNx04]
+        constraints: [node.role == manager]
 
   couchdb-chassgsg:
     container_name: couchdb-chassgsg
@@ -344,7 +357,7 @@ services:
         condition: on-failure
         max_attempts: 1
       placement:
-        constraints: [node.hostname == FabricNx04]
+        constraints: [node.role == manager]
 
 
 networks:
