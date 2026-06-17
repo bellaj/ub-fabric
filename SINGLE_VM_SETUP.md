@@ -9,7 +9,13 @@ The standard setup uses 13 VMs:
 - 1 Central Bank node (MAS)
 - 11 Bank nodes
 
-This guide shows how to consolidate all components into a single VM using Docker containers on a single machine.
+This guide runs the **2-org** single-VM network matching `network/docker-compose.yaml`:
+
+- **FabricNx01** — orderer
+- **FabricNx02** — MAS / central bank (`masgsgsg`)
+- **FabricNx03** — Bank of America Singapore (`bofasg2x`)
+
+Channels: `fundingchannel` and `nettingchannel` only (no bilateral channels; those require additional bank peers).
 
 ## Prerequisites
 
@@ -71,13 +77,81 @@ In a single VM setup, all containers will run on the same machine:
 └─────────────────────────────────────────────────┘
 ```
 
-## Step-by-Step Setup
+## Quick Start (single_vm branch)
+
+The `single_vm` branch ships the 2-org network above. Hostnames `FabricNx01`–`FabricNx03` are mapped via `/etc/hosts`.
+
+### 1. Install prerequisites
+
+```bash
+cd ~/abir/ubin/ub-fabric   # or $GOPATH/src/ubin-fabric
+bash fabric-setup.sh
+# log out/in so docker group membership applies
+ln -sfn "$(pwd)" "$HOME/go/src/ubin-fabric"
+```
+
+### 2. Map FabricNx hostnames to this VM
+
+```bash
+cd network
+sudo ./setup-hosts.sh
+# default: 127.0.0.1; remote access: UBIN_HOST_IP=192.168.x.x sudo -E ./setup-hosts.sh
+sudo hostnamectl set-hostname FabricNx02   # MAS/regulator node
+```
+
+This adds `FabricNx01`, `FabricNx02`, and `FabricNx03` to `/etc/hosts`. Configs use those names; ports distinguish services on the same IP.
+
+| Hostname | Role | Ports |
+|----------|------|-------|
+| FabricNx01 | Orderer | 7050 |
+| FabricNx02 | MAS peer / CA | 7051, 7053, 7054 |
+| FabricNx03 | BOFA peer / CA | 8051, 8053, 8054 |
+
+### 3. Install API dependencies
+
+```bash
+cd api
+npm install
+cd ..
+```
+
+### 4. Start the Fabric network
+
+```bash
+cd network
+# optional on multi-homed hosts: export UBIN_SWARM_ADDR=192.168.x.x
+./start-single-vm.sh
+```
+
+### 5. Initialise chaincodes and API (MAS node)
+
+```bash
+cd api/scripts
+cp ecosystem.config-template.js ecosystem.config.js
+./init.sh
+```
+
+If hostname is not `FabricNx02`, use `export UBIN_ORG=org0` before `init.sh` (or `org1` on FabricNx03 / BOFA node).
+
+### 6. Verify
+
+```bash
+curl http://localhost:8080/api/ping
+getent hosts FabricNx02
+docker service ls
+```
+
+---
+
+## Manual Setup Details
+
+The sections below describe what the scripts configure automatically.
 
 ### Step 1: Clone the Repository
 
 ```bash
 cd $GOPATH/src
-git clone https://github.com/bellaj/ub-fabric.git
+git clone -b single_vm https://github.com/bellaj/ub-fabric.git
 cd ub-fabric
 ```
 
@@ -89,11 +163,22 @@ npm install
 cd ..
 ```
 
-### Step 3: Configure for Single VM Deployment
+### Step 3: Single VM docker-compose (already configured)
 
-#### Modify `docker-compose.yaml`
+The bundled `network/docker-compose.yaml` includes:
 
-The default `docker-compose.yaml` assumes multiple VMs. For a single VM, modify it:
+- `node.role == manager` placement (all services on one host)
+- `couchdb:2.3.1` (CouchDB 3.x requires admin credentials; 2.3 works with Fabric peers)
+- Peer Swarm fixes: `CORE_PEER_LISTENADDRESS=0.0.0.0:7051`, `CORE_CHAINCODE_ADDRESS=0.0.0.0:7052`
+- Gossip via Docker DNS service names (`peer0.masgsgsg.example.com`, etc.)
+
+API configs (`api/config/network-config_*.json`, `network-reference.json`) define **org0 + org1 only**. Run `network/setup-hosts.sh` for `FabricNx01`–`FabricNx03`.
+
+Set hostname to `FabricNx02` (MAS) or export `UBIN_ORG=org0` when running init scripts.
+
+#### Legacy manual docker-compose edits
+
+If starting from the 13-VM compose file, modify it as follows:
 
 1. Update all hostname references to `localhost`
 2. Remove inter-VM networking requirements
@@ -245,20 +330,12 @@ module.exports = {
 ### Step 10: Install and Instantiate Chaincodes
 
 ```bash
-# From api folder
-cd $GOPATH/src/ubin-fabric/api
-
-# Install chaincodes on all peers
+cd api/scripts
+export UBIN_ORG=org0
 ./init.sh
-
-# Wait for installation to complete (2-3 minutes)
 ```
 
-The script will:
-- Install bilateral chaincode
-- Install funding chaincode
-- Install netting chaincode
-- Instantiate all chaincodes on each channel
+For the full 13-VM network, use `./init.sh` instead.
 
 ### Step 11: Start the API Layer
 

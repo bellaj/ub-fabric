@@ -1,9 +1,8 @@
 #!/bin/bash -e
 
+# 2-org network: only multilateral channels (matches docker-compose.yaml).
 cd /etc/hyperledger/configtx
-CHANNEL_TXS=( $(ls -q *-channel.tx) )
-
-echo "${CHANNEL_TXS[@]}"
+CHANNEL_TXS=( funding-channel.tx netting-channel.tx )
 
 for channel_tx in "${CHANNEL_TXS[@]}"
 do

@@ -16,16 +16,24 @@ sudo apt-get -y install \
   gnupg \
   lsb-release \
   python3 \
-  python3-pip
+  python3-pip \
+  git
+
+ARCH="$(uname -m)"
+case "${ARCH}" in
+  x86_64) GO_ARCH=amd64 ;;
+  aarch64|arm64) GO_ARCH=arm64 ;;
+  *) echo "Unsupported architecture: ${ARCH}"; exit 1 ;;
+esac
 
 echo
 echo "==============================================="
-echo " Installing Go"
+echo " Installing Go (${GO_ARCH})"
 echo "==============================================="
 echo
 
-GO_VERSION="1.22.4"
-GO_TARBALL="go${GO_VERSION}.linux-amd64.tar.gz"
+GO_VERSION="1.22.6"
+GO_TARBALL="go${GO_VERSION}.linux-${GO_ARCH}.tar.gz"
 
 wget "https://go.dev/dl/${GO_TARBALL}"
 sudo rm -rf /usr/local/go
@@ -33,57 +41,52 @@ sudo tar -zxvf "${GO_TARBALL}" -C /usr/local/
 rm "${GO_TARBALL}"
 
 mkdir -p "$HOME/go/src"
-
-{
-  echo 'export PATH=$PATH:/usr/local/go/bin'
-  echo 'export GOPATH=$HOME/go'
-} >> ~/.bashrc
-
+grep -q 'export GOPATH=' ~/.bashrc || echo 'export GOPATH=$HOME/go' >> ~/.bashrc
+grep -q '/usr/local/go/bin' ~/.bashrc || echo 'export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin' >> ~/.bashrc
 export PATH="$PATH:/usr/local/go/bin"
 export GOPATH="$HOME/go"
 
 echo
 echo "==============================================="
-echo " Installing Node JS"
+echo " Installing Node.js 16 (via nvm)"
 echo "==============================================="
 echo
 
-NODE_MAJOR=20
-
-curl -fsSL "https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key" \
-  | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-
-echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" \
-  | sudo tee /etc/apt/sources.list.d/nodesource.list
-
-sudo apt-get update
-sudo apt-get install -y nodejs
-
-sudo npm install pm2@latest -g
+export NVM_DIR="$HOME/.nvm"
+if [ ! -d "${NVM_DIR}" ]; then
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+fi
+# shellcheck disable=SC1091
+[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"
+nvm install 16
+nvm alias default 16
+nvm use 16
+npm install -g pm2@5
 
 echo
 echo "==============================================="
-echo " Installing Docker"
+echo " Installing Docker (if missing)"
 echo "==============================================="
 echo
 
-# Add Docker's official GPG key
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-  | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
+if ! command -v docker >/dev/null 2>&1; then
+  sudo install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-# Add Docker repository
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" \
-  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" \
+    | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-sudo usermod -aG docker "${USER}"
+  sudo apt-get update
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  sudo usermod -aG docker "${USER}"
+else
+  echo "Docker already installed: $(docker --version)"
+fi
 
 echo
 echo "==============================================="
@@ -94,8 +97,11 @@ echo
 echo -n "Go:      "; /usr/local/go/bin/go version
 echo -n "Node:    "; node --version
 echo -n "npm:     "; npm --version
+echo -n "pm2:     "; pm2 --version
 echo -n "Docker:  "; docker --version
-echo -n "Compose: "; docker compose version
 
 echo
-echo "===== Initial setup complete. Please restart your machine for changes to take effect. ====="
+echo "Link repo into GOPATH (if cloned elsewhere):"
+echo "  ln -sfn \$(pwd) \$GOPATH/src/ubin-fabric"
+echo
+echo "===== Initial setup complete. Log out/in for docker group, then run network/start-single-vm.sh ====="

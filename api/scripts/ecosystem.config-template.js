@@ -7,9 +7,9 @@ module.exports = {
     {
       name      : 'Ubin Fabric API',
       script    : '../app.js',
-      args      : 'ORG_BIC',
+      args      : 'masgsgsg',
       env: {
-        GOPATH: '/home/azureuser'
+        GOPATH: process.env.HOME + '/go'
       },
       error_file: '../logs/err.log',
       out_file  : '../logs/out.log',

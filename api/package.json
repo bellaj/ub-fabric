@@ -9,7 +9,8 @@
     "npm": ">=3.10.10"
   },
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "postinstall": "node -e \"console.log('Dependencies installed. Use Node 16 if native modules fail on newer versions.')\""
   },
   "author": "Accenture",
   "license": "Apache-2.0",
@@ -25,8 +26,7 @@
     "fs-extra": "^2.0.0",
     "log4js": "^0.6.38",
     "nodemon": "^1.9.2",
-    "request": "^2.83.0",
-    "sleep": "^5.1.1"
+    "request": "^2.83.0"
   },
   "devDependencies": {
     "response-time": "^2.3.2",

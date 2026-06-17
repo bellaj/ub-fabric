@@ -643,9 +643,33 @@ function IsJsonString(str) {
     return true;
 }
 
+function getBankOrgs() {
+	return Object.keys(ORGS).filter(function(k) {
+		return k.indexOf('org') === 0 && ORGS[k] && ORGS[k].mspid;
+	}).sort();
+}
+
+function multilateralEndorsementPolicy(threshold) {
+	var orgs = getBankOrgs();
+	var identities = orgs.map(function(org) {
+		return { role: { name: 'member', mspId: ORGS[org].mspid }};
+	});
+	var signedBy = orgs.map(function(_, i) { return { 'signed-by': i }; });
+	var policy = {};
+	policy[Math.min(threshold, orgs.length) + '-of'] = signedBy;
+	return { identities: identities, policy: policy };
+}
+
+function allOrgsEndorsementPolicy() {
+	var orgs = getBankOrgs();
+	return multilateralEndorsementPolicy(orgs.length);
+}
+
 exports.IsJsonString = IsJsonString;
 exports.stringify = stringify;
 exports.JSONValueToArray = JSONValueToArray;
 exports.sort = sort;
 exports.channelList = channelList;
+exports.multilateralEndorsementPolicy = multilateralEndorsementPolicy;
+exports.allOrgsEndorsementPolicy = allOrgsEndorsementPolicy;
 
