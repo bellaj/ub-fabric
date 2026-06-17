@@ -2,7 +2,7 @@
 # MAS + 2 banks: funding, netting, and one bilateral channel (BOFA–CHASSGSG).
 
 start=`date +%s`
-echo "1" > cc_version.txt
+echo "2" > cc_version.txt
 VERSION=`cat cc_version.txt`
 
 echo "Disabling ping cron job"
@@ -36,6 +36,7 @@ if [ "${ORG_NAME}" = "${REGULATOR_ORG}" ]; then
     echo "Instantiating chaincodes on MAS..."
     InstantiateMultilateral fundingchannel
     InstantiateMultilateral nettingchannel
+    InitNettingLedger
     InstantiateBilateral bofasg2xchassgsgchannel
     sleep 10
     InitChannelAccounts bofasg2xchassgsgchannel

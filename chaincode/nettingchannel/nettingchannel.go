@@ -20,6 +20,11 @@ func main() {
 }
 
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+	// Fabric 2.x lscc instantiate cannot write ledger state in Init.
+	return shim.Success(nil)
+}
+
+func initializeNettingCycle(stub shim.ChaincodeStubInterface) pb.Response {
 	currTime, err := getTxTimeStampAsTime(stub)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -80,6 +85,8 @@ func (t *SimpleChaincode) Invoke(
 		return t.getBilateralNettableTxList(stub, args)
 	} else if function == "resetChannel" {
 		return t.resetChannel(stub)
+	} else if function == "initLedger" {
+		return initializeNettingCycle(stub)
 	}
 
 	fmt.Println("Netting channel chaincode invocation did not find func: " + function) //error

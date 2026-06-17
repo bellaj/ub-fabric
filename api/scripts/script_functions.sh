@@ -211,7 +211,28 @@ InitAccount() {
     echo
 }
 
-InitChannelAccounts() {
+InitNettingLedger() {
+    CHANNEL=nettingchannel
+    PEER0=`jq -r .channelMapping.${CHANNEL}[0] ${NETWORK_REFERENCE_FILE}`
+    PEER1=`jq -r .channelMapping.${CHANNEL}[1] ${NETWORK_REFERENCE_FILE}`
+    PEER2=`jq -r .channelMapping.${CHANNEL}[2] ${NETWORK_REFERENCE_FILE}`
+
+    echo "POST - initLedger on ${CHANNEL}"
+    RESP=$(curl -s -X POST \
+        http://localhost:8080/api/channels/${CHANNEL}/chaincodes/nettingchannel_cc \
+        -H "content-type: application/json" \
+        -d "{
+        \"username\" : \"${ORG_USER}\",
+        \"orgname\" : \"${ORG_NAME}\",
+        \"peers\": [\"${PEER0}\", \"${PEER1}\", \"${PEER2}\"],
+        \"fcn\":\"initLedger\",
+        \"args\":[]
+    }")
+    echo "InitNettingLedger response:"
+    echo "$RESP"
+    echo
+}
+
     CHANNEL=$1
 
     ACCT1=`jq -r .channelBankMapping.${CHANNEL}[0] ${NETWORK_REFERENCE_FILE}`
