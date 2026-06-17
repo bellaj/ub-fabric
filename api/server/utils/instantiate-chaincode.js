@@ -73,7 +73,7 @@ var instantiateChaincode = function(peersUrls, channelName, chaincodeName, chain
 		}
 		
 		logger.info("Proposal Request : " + request.toString());
-		return channel.sendInstantiateProposal(request, 600000);
+		return channel.sendInstantiateProposal(request, 1800000);
 	}, (err) => {
 		logger.error('Failed to initialize the channel %j', err);
 		throw new Error('Failed to initialize the channel');
