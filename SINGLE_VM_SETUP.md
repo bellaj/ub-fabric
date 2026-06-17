@@ -18,7 +18,7 @@ Your VM should meet the following requirements:
 - **Operating System**: Ubuntu 16.04.3 LTS (64-bit) or later
 - **CPU**: Minimum 4 cores (8+ recommended)
 - **RAM**: Minimum 8GB (16GB recommended)
-- **Disk Space**: Minimum 50GB free space
+- **Disk Space**: Minimum 10GB free space
 - **Docker**: 17.09.0-ce or later
 - **Fabric**: 1.0.1
 - **Go**: 1.7.6 or later
@@ -120,7 +120,7 @@ version: '3.1'
 
 services:
   orderer:
-    image: hyperledger/fabric-orderer:x86_64-1.0.1
+    image: hyperledger/fabric-orderer:2.5.15
     environment:
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_GENESISMETHOD=file
@@ -135,7 +135,7 @@ services:
     command: orderer
 
   peer0-mas:
-    image: hyperledger/fabric-peer:x86_64-1.0.1
+    image: hyperledger/fabric-peer:2.5.12
     environment:
       - CORE_PEER_ID=peer0.mas.example.com
       - CORE_PEER_ADDRESS=localhost:7051
