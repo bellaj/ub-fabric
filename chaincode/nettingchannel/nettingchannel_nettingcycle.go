@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 func (t *SimpleChaincode) conductMLNetting(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	//  nettingCycleID, bankID, nettableArray, nonNettableArray, nettedValue
 	var nettingCycleID int
@@ -160,7 +160,7 @@ func (t *SimpleChaincode) conductMLNetting(
 }
 
 func (t *SimpleChaincode) expireOngoingMLNetting(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	isExpired, err := checkOngoingMLNettingExpiry(stub)
 	if err != nil {
@@ -206,7 +206,7 @@ func checkOngoingMLNettingExpiry(
 
 func (t *SimpleChaincode) updateOngoingMLNettingStatus(
 	stub shim.ChaincodeStubInterface,
-	status string) pb.Response {
+	status string) *pb.Response {
 
 	currTime, err := getTxTimeStampAsTime(stub)
 	if err != nil {
@@ -230,7 +230,7 @@ func (t *SimpleChaincode) updateOngoingMLNettingStatus(
 	return shim.Success(nil)
 }
 
-func (t *SimpleChaincode) queryOngoingMLNetting(stub shim.ChaincodeStubInterface) pb.Response {
+func (t *SimpleChaincode) queryOngoingMLNetting(stub shim.ChaincodeStubInterface) *pb.Response {
 	nettingCycleAsBytes, err := stub.GetState(nettingCycleObjectType)
 	if err != nil {
 		return shim.Error("Error: Failed to get state for current nettingcycle")
@@ -242,7 +242,7 @@ func (t *SimpleChaincode) queryOngoingMLNetting(stub shim.ChaincodeStubInterface
 
 func (t *SimpleChaincode) getBilateralNettableTxList(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 2)
 	if err != nil {
@@ -293,7 +293,7 @@ func (t *SimpleChaincode) getBilateralNettableTxList(
 
 func (t *SimpleChaincode) checkParticipation(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 2)
 	if err != nil {
@@ -329,7 +329,7 @@ func (t *SimpleChaincode) checkParticipation(
 }
 
 func (t *SimpleChaincode) getNonNettableTxList(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	nettingCycle, err := getCurrentNettingCycle(stub)
 	if err != nil {

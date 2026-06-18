@@ -1,8 +1,8 @@
 #!/bin/bash
-# MAS + 2 banks: funding, netting, and one bilateral channel (BOFA–CHASSGSG).
+# MAS + 2 banks: Fabric 2.x lifecycle deploy (funding, netting, bilateral).
 
 start=`date +%s`
-echo "3" > cc_version.txt
+echo "1" > cc_version.txt
 VERSION=`cat cc_version.txt`
 
 echo "Disabling ping cron job"
@@ -18,12 +18,13 @@ mkdir -p ../logs
 RestartNodeJS
 
 echo
-echo "---------------- 3-ORG CONFIGURATION ----------------"
+echo "---------------- 3-ORG CONFIGURATION (Fabric 2 lifecycle) ----------------"
 echo " NAME: ${ORG_NAME}"
 echo " USER: ${ORG_USER}"
 echo " PEER: ${ORG_PEER}"
 echo " CONFIG FILE: ${NETWORK_CONFIG_FILE}"
-echo "-------------------------------------------------------"
+echo " CC VERSION / SEQUENCE: ${VERSION}"
+echo "-------------------------------------------------------------------------"
 echo
 
 echo "Enrolling all org users..."
@@ -31,26 +32,22 @@ EnrollOrg "${ORG0_NAME}" "${ORG0_BIC}"
 EnrollOrg "${ORG1_NAME}" "${ORG1_BIC}"
 EnrollOrg "${ORG2_NAME}" "${ORG2_BIC}"
 
-echo "Installing chaincodes on all required peers..."
-InstallOn "${ORG0_NAME}" "${ORG0_PEER}" "${ORG0_BIC}" bilateralchannel
-InstallOn "${ORG0_NAME}" "${ORG0_PEER}" "${ORG0_BIC}" fundingchannel
-InstallOn "${ORG0_NAME}" "${ORG0_PEER}" "${ORG0_BIC}" nettingchannel
-InstallOn "${ORG1_NAME}" "${ORG1_PEER}" "${ORG1_BIC}" bilateralchannel
-InstallOn "${ORG1_NAME}" "${ORG1_PEER}" "${ORG1_BIC}" nettingchannel
-InstallOn "${ORG2_NAME}" "${ORG2_PEER}" "${ORG2_BIC}" bilateralchannel
-InstallOn "${ORG2_NAME}" "${ORG2_PEER}" "${ORG2_BIC}" nettingchannel
-
 if [ "${ORG_NAME}" = "${REGULATOR_ORG}" ]; then
-    echo "Waiting 30s before instantiate..."
+    REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+    echo "Vendoring chaincode dependencies..."
+    VendorChaincodes "${REPO_ROOT}"
+
+    echo "Waiting 30s before chaincode lifecycle deploy..."
     sleep 30
-    echo "Instantiating chaincodes..."
-    InstantiateMultilateralAs "${ORG0_NAME}" "${ORG0_BIC}" "${ORG0_PEER}" fundingchannel
-    sleep 20
-    InstantiateMultilateralAs "${ORG0_NAME}" "${ORG0_BIC}" "${ORG0_PEER}" nettingchannel
-    sleep 20
+
+    echo "Deploying chaincodes (Fabric 2 lifecycle)..."
+    LifecycleDeployFunding
+    sleep 10
+    LifecycleDeployNetting
+    sleep 10
     InitNettingLedger
     sleep 10
-    InstantiateBilateral bofasg2xchassgsgchannel
+    LifecycleDeployBilateral bofasg2xchassgsgchannel
     sleep 10
     InitChannelAccounts bofasg2xchassgsgchannel
 fi

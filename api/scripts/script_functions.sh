@@ -9,6 +9,10 @@ else
     . ~/ubin-fabric-api/scripts/config.sh
 fi
 
+if [ -e ./lifecycle_functions.sh ]; then
+    . ./lifecycle_functions.sh
+fi
+
 CURRENCY=SGD
 
 SetPeers() {
@@ -271,8 +275,8 @@ InitChannelAccounts() {
     ACCT1=`jq -r .channelBankMapping.${CHANNEL}[0] ${NETWORK_REFERENCE_FILE}`
     ACCT2=`jq -r .channelBankMapping.${CHANNEL}[1] ${NETWORK_REFERENCE_FILE}`
 
-    InitAccountOn "${ORG1_NAME}" "${ORG1_BIC}" "${ACCT1}" 0 "${CHANNEL}"
-    InitAccountOn "${ORG1_NAME}" "${ORG1_BIC}" "${ACCT2}" 0 "${CHANNEL}"
+    InitAccountOn "${ORG1_NAME}" "${ORG1_BIC}" "${ACCT1}" 200 "${CHANNEL}"
+    InitAccountOn "${ORG2_NAME}" "${ORG2_BIC}" "${ACCT2}" 200 "${CHANNEL}"
 }
 
 #**********************************************

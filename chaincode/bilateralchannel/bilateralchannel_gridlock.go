@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 func (t *SimpleChaincode) settleMLNettingInstructions(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -62,7 +62,7 @@ func (t *SimpleChaincode) settleMLNettingInstructions(
 }
 
 func (t *SimpleChaincode) unfreezeAllTransactions(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	frozenQueuesArr, err := unfreezeAllQueues(stub)
 	if err != nil {

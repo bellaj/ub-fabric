@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 func (t *SimpleChaincode) initAccount(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	// AccountID, Currency, Amount, Status
 	err := checkArgArrayLength(args, 4)
@@ -71,7 +71,7 @@ func (t *SimpleChaincode) initAccount(
 }
 
 func (t *SimpleChaincode) getChannelLiquidity(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	queryString := fmt.Sprintf(
 		`{"selector":{"docType":"%s"}}`,
@@ -102,7 +102,7 @@ func (t *SimpleChaincode) updateAccount(
 	accountID string,
 	currency string,
 	amount float64,
-	status string) pb.Response {
+	status string) *pb.Response {
 
 	account, err := getAccountStructFromID(stub, accountID)
 	if err != nil {
@@ -212,7 +212,7 @@ func updateAccountBalance(
 
 func (t *SimpleChaincode) deleteAccount(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -250,7 +250,7 @@ func (t *SimpleChaincode) deleteAccount(
 func (t *SimpleChaincode) updateAccountStatus(
 	stub shim.ChaincodeStubInterface,
 	args []string,
-	status string) pb.Response {
+	status string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {

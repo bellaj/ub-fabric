@@ -11,8 +11,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	mspprotos "github.com/hyperledger/fabric/protos/msp"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	mspprotos "github.com/hyperledger/fabric-protos-go-apiv2/msp"
 )
 
 func getCurrentNettingCycle(

@@ -18,9 +18,9 @@ fi
 
 if ! docker info 2>/dev/null | grep -q 'Swarm: active'; then
   if [ -n "${ADVERTISE_ADDR}" ]; then
-    docker swarm init --advertise-addr "${ADVERTISE_ADDR}"
+    docker swarm init --advertise-addr "${ADVERTISE_ADDR}" || true
   else
-    docker swarm init || docker swarm init --advertise-addr 127.0.0.1
+    docker swarm init --advertise-addr 127.0.0.1 2>/dev/null || docker swarm init 2>/dev/null || true
   fi
 fi
 

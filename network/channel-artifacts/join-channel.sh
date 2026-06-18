@@ -22,5 +22,5 @@ join_channel() {
 
 for channel in "${@:2}"; do
     join_channel $channel
-done       
+done
 echo "All done..."

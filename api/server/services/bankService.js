@@ -85,8 +85,12 @@ function getAccDetails (req, res, callback, regulator=null){
 		if( helper.multilateralChannels.includes(channelName) || channelName.indexOf(helper.getName(bankName).toLowerCase()) == -1 ){
 			functioncallback();
 		} else {
-            var tempBankName = regulator == null ? bankName : regulator ;
-            var tempOrgName = regulator == null ? orgname : helper.bankOrgMapping[regulator] ;
+            var tempBankName = bankAccount;
+            var tempOrgName = orgname;
+            if (regulator != null && helper.multilateralChannels.includes(channelName)) {
+                tempBankName = regulator;
+                tempOrgName = helper.bankOrgMapping[regulator];
+            }
             logger.debug(channelName + ":" + chaincodeName + ":" + fcn + ":" + args + "bankName: " + tempBankName + "Org: " + tempOrgName);
 			query.queryChaincode("peer0", channelName, chaincodeName, args, fcn, tempBankName, tempOrgName)
 			.then(function(message) {

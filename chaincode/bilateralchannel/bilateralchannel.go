@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // Netting channel constants
@@ -30,11 +30,11 @@ func main() {
 	}
 }
 
-func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) *pb.Response {
 	return shim.Success(nil)
 }
 
-func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) *pb.Response {
 	function, args := stub.GetFunctionAndParameters()
 	fmt.Println("invoke account is running " + function)
 
@@ -115,7 +115,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 func (t *SimpleChaincode) pingChaincode(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	pingChaincodeAsBytes, err := stub.GetState("pingchaincode")
 	if err != nil {
@@ -149,7 +149,7 @@ func (t *SimpleChaincode) pingChaincode(
 }
 
 func (t *SimpleChaincode) pingChaincodeQuery(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	pingChaincodeAsBytes, err := stub.GetState("pingchaincode")
 	if err != nil {
@@ -160,7 +160,7 @@ func (t *SimpleChaincode) pingChaincodeQuery(
 
 func (t *SimpleChaincode) getStateAsBytes(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -181,7 +181,7 @@ func (t *SimpleChaincode) getStateAsBytes(
 
 func (t *SimpleChaincode) getTransactionHistory(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	var completedTransactionArr []CompletedTransaction
 	var pledgeRedeemFundArr []PledgeRedeemFund
@@ -264,7 +264,7 @@ func (t *SimpleChaincode) getTransactionHistory(
 
 func (t *SimpleChaincode) resetChannel(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	var err error
 	respMsg := "Successfully reset all assets"

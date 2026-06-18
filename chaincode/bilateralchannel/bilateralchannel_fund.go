@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 func (t *SimpleChaincode) createDestroyFund(
 	stub shim.ChaincodeStubInterface,
 	args []string,
-	docType string) pb.Response {
+	docType string) *pb.Response {
 
 	// AccountID, Currency, Amount
 	err := checkArgArrayLength(args, 3)
@@ -166,7 +166,7 @@ func validateTransaction(
 
 func (t *SimpleChaincode) fundTransfer(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	//  sender, receiver, priority, amount, currency, isPutToQueue
 	newTx, isPutToQueue, err := validateTransaction(stub, args)

@@ -21,8 +21,7 @@
             },
             "channels": [
                 "fundingchannel",
-                "nettingchannel",
-                "bofasg2xchassgsgchannel"
+                "nettingchannel"
             ],
             "orgPeers": [
                 "FabricNx02:7051"

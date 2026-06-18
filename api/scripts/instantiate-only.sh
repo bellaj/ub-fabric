@@ -1,5 +1,5 @@
 #!/bin/bash
-# Re-run instantiate steps (chaincode v3 already installed). Re-joins channels first.
+# Re-run Fabric 2 lifecycle deploy (after channel re-join if needed).
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,18 +8,21 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 . "${SCRIPT_DIR}/script_functions.sh"
 VERSION=`cat cc_version.txt 2>/dev/null || echo 3`
 
-echo "Re-joining channels after peer restart..."
+echo "Vendoring chaincode dependencies..."
+VendorChaincodes "${REPO_ROOT}"
+
+echo "Re-joining channels..."
 "${REPO_ROOT}/network/channels.sh"
 
 echo "Waiting 30s for peers..."
 sleep 30
 
-InstantiateMultilateralAs "${ORG0_NAME}" "${ORG0_BIC}" "${ORG0_PEER}" fundingchannel
-sleep 20
-InstantiateMultilateralAs "${ORG0_NAME}" "${ORG0_BIC}" "${ORG0_PEER}" nettingchannel
-sleep 20
+LifecycleDeployFunding
+sleep 10
+LifecycleDeployNetting
+sleep 10
 InitNettingLedger
 sleep 10
-InstantiateBilateral bofasg2xchassgsgchannel
+LifecycleDeployBilateral bofasg2xchassgsgchannel
 sleep 10
 InitChannelAccounts bofasg2xchassgsgchannel

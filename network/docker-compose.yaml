@@ -121,6 +121,8 @@ services:
       - ./crypto-config/peerOrganizations/masgsgsg.example.com/peers/peer0.masgsgsg.example.com/:/etc/hyperledger/crypto/peer
       - ./crypto-config/peerOrganizations/masgsgsg.example.com/users:/etc/hyperledger/crypto/msp/users
       - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/:/etc/hyperledger/crypto/orderer
+      - ../chaincode:/opt/gopath/src/ubin-fabric/chaincode:ro
+      - ../api/scripts/.packages:/packages:ro
     networks:
       fabric:
         aliases:
@@ -225,6 +227,8 @@ services:
       - ./crypto-config/peerOrganizations/bofasg2x.example.com/peers/peer0.bofasg2x.example.com/:/etc/hyperledger/crypto/peer
       - ./crypto-config/peerOrganizations/bofasg2x.example.com/users:/etc/hyperledger/crypto/msp/users
       - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/:/etc/hyperledger/crypto/orderer
+      - ../chaincode:/opt/gopath/src/ubin-fabric/chaincode:ro
+      - ../api/scripts/.packages:/packages:ro
     networks:
       fabric:
         aliases:
@@ -328,6 +332,8 @@ services:
       - ./crypto-config/peerOrganizations/chassgsg.example.com/peers/peer0.chassgsg.example.com/:/etc/hyperledger/crypto/peer
       - ./crypto-config/peerOrganizations/chassgsg.example.com/users:/etc/hyperledger/crypto/msp/users
       - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/:/etc/hyperledger/crypto/orderer
+      - ../chaincode:/opt/gopath/src/ubin-fabric/chaincode:ro
+      - ../api/scripts/.packages:/packages:ro
     networks:
       fabric:
         aliases:

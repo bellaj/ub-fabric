@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 const timeLayout string = "2006-01-02T15:04:05.999Z"
@@ -19,12 +19,12 @@ func main() {
 	}
 }
 
-func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) *pb.Response {
 	// Fabric 2.x lscc instantiate cannot write ledger state in Init.
 	return shim.Success(nil)
 }
 
-func initializeNettingCycle(stub shim.ChaincodeStubInterface) pb.Response {
+func initializeNettingCycle(stub shim.ChaincodeStubInterface) *pb.Response {
 	currTime, err := getTxTimeStampAsTime(stub)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -52,7 +52,7 @@ func initializeNettingCycle(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 func (t *SimpleChaincode) Invoke(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	function, args := stub.GetFunctionAndParameters()
 	fmt.Println("invoke MultilateralChannel is running " + function)
@@ -94,7 +94,7 @@ func (t *SimpleChaincode) Invoke(
 }
 
 func (t *SimpleChaincode) pingChaincode(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	pingChaincodeAsBytes, err := stub.GetState("pingchaincode")
 	if err != nil {
@@ -128,7 +128,7 @@ func (t *SimpleChaincode) pingChaincode(
 }
 
 func (t *SimpleChaincode) pingChaincodeQuery(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	pingChaincodeAsBytes, err := stub.GetState("pingchaincode")
 	if err != nil {
@@ -138,7 +138,7 @@ func (t *SimpleChaincode) pingChaincodeQuery(
 }
 
 func (t *SimpleChaincode) resetChannel(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	err := resetNettingCycle(stub)
 	if err != nil {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	pb "github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
 // ***********************************************************
@@ -14,7 +14,7 @@ import (
 // ***********************************************************
 
 func (t *SimpleChaincode) getSortedQueueString(
-	stub shim.ChaincodeStubInterface) pb.Response {
+	stub shim.ChaincodeStubInterface) *pb.Response {
 
 	queryString := fmt.Sprintf(
 		`{"selector":{"docType":"%s"}}`,
@@ -32,7 +32,7 @@ func (t *SimpleChaincode) getSortedQueueString(
 
 func (t *SimpleChaincode) getOutgoingQueueString(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -57,7 +57,7 @@ func (t *SimpleChaincode) getOutgoingQueueString(
 
 func (t *SimpleChaincode) getIncomingQueueString(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -81,7 +81,7 @@ func (t *SimpleChaincode) getIncomingQueueString(
 
 func (t *SimpleChaincode) getNettableOutgoingQueueString(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -111,7 +111,7 @@ func (t *SimpleChaincode) getNettableOutgoingQueueString(
 
 func (t *SimpleChaincode) getNettableIncomingQueueString(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -146,7 +146,7 @@ func (t *SimpleChaincode) getNettableIncomingQueueString(
 func (t *SimpleChaincode) updateQueueStatus(
 	stub shim.ChaincodeStubInterface,
 	args []string,
-	status string) pb.Response {
+	status string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -185,7 +185,7 @@ func (t *SimpleChaincode) updateQueueStatus(
 
 func (t *SimpleChaincode) toggleHoldResume(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	err := checkArgArrayLength(args, 1)
 	if err != nil {
@@ -230,7 +230,7 @@ func (t *SimpleChaincode) toggleHoldResume(
 
 func (t *SimpleChaincode) updateQueuePriority(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	// instructionID, priority, currentTime
 	err := checkArgArrayLength(args, 2)
@@ -282,7 +282,7 @@ func (t *SimpleChaincode) updateQueuePriority(
 
 func (t *SimpleChaincode) cancelQueue(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	// queueID
 	err := checkArgArrayLength(args, 1)
@@ -317,7 +317,7 @@ func (t *SimpleChaincode) cancelQueue(
 
 func (t *SimpleChaincode) checkQueueAndSettle(
 	stub shim.ChaincodeStubInterface,
-	args []string) pb.Response {
+	args []string) *pb.Response {
 
 	var totalSettledAmount float64
 	var receiverAccount *Account

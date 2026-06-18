@@ -39,7 +39,7 @@ for (let key in ORGS) {
 		let client = new hfc();
 		logger.debug("Key : " + key);
 
-		channelList(whoami()).forEach(function(channelName){
+		channelList(ORGS[key].bic).forEach(function(channelName){
 			logger.debug("\t Channel Name: " + channelName);
 			let cryptoSuite = hfc.newCryptoSuite();
 			cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: getKeyStoreForOrg(ORGS[key].bic)}));

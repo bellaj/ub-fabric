@@ -96,8 +96,7 @@ func (t *headerFieldTable) evictOldest(n int) {
 // meaning t.ents is reversed for dynamic tables. Hence, when t is a dynamic
 // table, the return value i actually refers to the entry t.ents[t.len()-i].
 //
-// All tables are assumed to be a dynamic tables except for the global
-// staticTable pointer.
+// All tables are assumed to be a dynamic tables except for the global staticTable.
 //
 // See Section 2.3.3.
 func (t *headerFieldTable) search(f HeaderField) (i uint64, nameValueMatch bool) {
@@ -123,85 +122,6 @@ func (t *headerFieldTable) idToIndex(id uint64) uint64 {
 		return uint64(t.len()) - k // dynamic table
 	}
 	return k + 1
-}
-
-func pair(name, value string) HeaderField {
-	return HeaderField{Name: name, Value: value}
-}
-
-// http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07#appendix-B
-var staticTable = newStaticTable()
-var staticTableEntries = [...]HeaderField{
-	pair(":authority", ""),
-	pair(":method", "GET"),
-	pair(":method", "POST"),
-	pair(":path", "/"),
-	pair(":path", "/index.html"),
-	pair(":scheme", "http"),
-	pair(":scheme", "https"),
-	pair(":status", "200"),
-	pair(":status", "204"),
-	pair(":status", "206"),
-	pair(":status", "304"),
-	pair(":status", "400"),
-	pair(":status", "404"),
-	pair(":status", "500"),
-	pair("accept-charset", ""),
-	pair("accept-encoding", "gzip, deflate"),
-	pair("accept-language", ""),
-	pair("accept-ranges", ""),
-	pair("accept", ""),
-	pair("access-control-allow-origin", ""),
-	pair("age", ""),
-	pair("allow", ""),
-	pair("authorization", ""),
-	pair("cache-control", ""),
-	pair("content-disposition", ""),
-	pair("content-encoding", ""),
-	pair("content-language", ""),
-	pair("content-length", ""),
-	pair("content-location", ""),
-	pair("content-range", ""),
-	pair("content-type", ""),
-	pair("cookie", ""),
-	pair("date", ""),
-	pair("etag", ""),
-	pair("expect", ""),
-	pair("expires", ""),
-	pair("from", ""),
-	pair("host", ""),
-	pair("if-match", ""),
-	pair("if-modified-since", ""),
-	pair("if-none-match", ""),
-	pair("if-range", ""),
-	pair("if-unmodified-since", ""),
-	pair("last-modified", ""),
-	pair("link", ""),
-	pair("location", ""),
-	pair("max-forwards", ""),
-	pair("proxy-authenticate", ""),
-	pair("proxy-authorization", ""),
-	pair("range", ""),
-	pair("referer", ""),
-	pair("refresh", ""),
-	pair("retry-after", ""),
-	pair("server", ""),
-	pair("set-cookie", ""),
-	pair("strict-transport-security", ""),
-	pair("transfer-encoding", ""),
-	pair("user-agent", ""),
-	pair("vary", ""),
-	pair("via", ""),
-	pair("www-authenticate", ""),
-}
-
-func newStaticTable() *headerFieldTable {
-	t := &headerFieldTable{}
-	t.init()
-	for _, e := range staticTableEntries[:] {
-		t.addEntry(e)
-	}
-	return t
 }
 
 var huffmanCodes = [256]uint32{

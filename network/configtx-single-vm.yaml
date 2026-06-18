@@ -1,0 +1,204 @@
+# Fabric 2.5 — 3-org single-VM (MAS + BOFA + CHASSGSG)
+# Anchor order: Organizations → Capabilities → Defaults → Profiles
+
+Organizations:
+    - &OrdererOrg
+        Name: OrdererOrg
+        ID: OrdererMSP
+        MSPDir: crypto-config/ordererOrganizations/example.com/msp
+        AdminPrincipal: Role.MEMBER
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+
+    - &masgsgsg
+        Name: masgsgsg
+        ID: masgsgsgMSP
+        MSPDir: crypto-config/peerOrganizations/masgsgsg.example.com/msp
+        AdminPrincipal: Role.MEMBER
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('masgsgsgMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('masgsgsgMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('masgsgsgMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('masgsgsgMSP.member')"
+        AnchorPeers:
+            - Host: peer0.masgsgsg.example.com
+              Port: 7051
+
+    - &bofasg2x
+        Name: bofasg2x
+        ID: bofasg2xMSP
+        MSPDir: crypto-config/peerOrganizations/bofasg2x.example.com/msp
+        AdminPrincipal: Role.MEMBER
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('bofasg2xMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('bofasg2xMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('bofasg2xMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('bofasg2xMSP.member')"
+        AnchorPeers:
+            - Host: peer0.bofasg2x.example.com
+              Port: 7051
+
+    - &chassgsg
+        Name: chassgsg
+        ID: chassgsgMSP
+        MSPDir: crypto-config/peerOrganizations/chassgsg.example.com/msp
+        AdminPrincipal: Role.MEMBER
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('chassgsgMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('chassgsgMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('chassgsgMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('chassgsgMSP.member')"
+        AnchorPeers:
+            - Host: peer0.chassgsg.example.com
+              Port: 7051
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V2_0: true
+    Orderer: &OrdererCapabilities
+        V2_0: true
+    Application: &ApplicationCapabilities
+        V2_0: true
+        V2_5: true
+
+Application: &ApplicationDefaults
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "ANY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+        - orderer.example.com:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 98 MB
+        PreferredMaxBytes: 512 KB
+    Capabilities:
+        <<: *OrdererCapabilities
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+    Organizations:
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "ANY Admins"
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+    OrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+        Consortiums:
+            RTGSConsortium:
+                Organizations:
+                    - *masgsgsg
+                    - *bofasg2x
+                    - *chassgsg
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *masgsgsg
+                - *bofasg2x
+                - *chassgsg
+
+    fundingChannel:
+        Consortium: RTGSConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *masgsgsg
+                - *bofasg2x
+                - *chassgsg
+
+    nettingChannel:
+        Consortium: RTGSConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *masgsgsg
+                - *bofasg2x
+                - *chassgsg
+
+    bofasg2xchassgsgChannel:
+        Consortium: RTGSConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *bofasg2x
+                - *chassgsg
