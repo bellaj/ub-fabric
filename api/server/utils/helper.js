@@ -39,7 +39,7 @@ for (let key in ORGS) {
 		let client = new hfc();
 		logger.debug("Key : " + key);
 
-		channelList(ORGS[key].bic).forEach(function(channelName){
+		(channelList(ORGS[key].bic) || []).forEach(function(channelName){
 			logger.debug("\t Channel Name: " + channelName);
 			let cryptoSuite = hfc.newCryptoSuite();
 			cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: getKeyStoreForOrg(ORGS[key].bic)}));
@@ -174,7 +174,7 @@ function newRemotes(urls, forPeers, userOrg, channelName) {
 
 function channelList(bankname){
 	if(regulators.includes(bankname)){
-		return ORGS[getOrg(bankname)].channels
+		return ORGS[getOrg(bankname)].channels || []
 	} else {
 		var org = getOrg(bankname)
 		var multiChannels =  multilateralChannels.length > 0 ? Object.keys(multilateralChannels).map(function(k) { return multilateralChannels[k] }) : [] ;
