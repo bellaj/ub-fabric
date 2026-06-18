@@ -106,14 +106,8 @@ var upgradeChaincode = function(peersUrls, channelName, chaincodeName, chaincode
 			// fail the test
 			var deployId = tx_id.getTransactionID();
 
-			eh = client.newEventHub();
-			let data = fs.readFileSync(path.join(__dirname, ORGS[org]['peer0'][
-				'tls_cacerts'
-			]));
-			eh.setPeerAddr(ORGS[org]['peer0']['events'], {
-				pem: Buffer.from(data).toString(),
-				'ssl-target-name-override': ORGS[org]['peer0']['server-hostname']
-			});
+			const peerName = ORGS[org]['peer0'].requests.split('grpc://')[1];
+			eh = channel.getChannelEventHub(peerName);
 			eh.connect();
 
 			let txPromise = new Promise((resolve, reject) => {
@@ -125,7 +119,7 @@ var upgradeChaincode = function(peersUrls, channelName, chaincodeName, chaincode
 				eh.registerTxEvent(deployId, (tx, code) => {
 					logger.info(
 						'The chaincode upgrade transaction has been committed on peer ' +
-						eh._ep._endpoint.addr);
+						eh.getPeerAddr());
 					clearTimeout(handle);
 					eh.unregisterTxEvent(deployId);
 					eh.disconnect();

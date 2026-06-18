@@ -114,13 +114,14 @@ function getBilateralOrgName(org, channelName){
 	}	
 }
 
-function newRemotes(urls, forPeers, userOrg) {
+function newRemotes(urls, forPeers, userOrg, channelName) {
 	var targets = [];
 	// find the peer that match the urls
 	let found = false;
 	outer:
 	for (let index in urls) {
 		let peerUrl = urls[index];
+		found = false;
 
 		for (let key in ORGS) {
 			if (key.indexOf('org') === 0) {
@@ -147,13 +148,13 @@ function newRemotes(urls, forPeers, userOrg) {
 								
 								continue outer;
 							} else {
-								let eh = client.newEventHub();
-								let data = fs.readFileSync(path.join(__dirname, org[prop]['tls_cacerts']));
-								eh.setPeerAddr(org[prop]['events'], {
-									pem: Buffer.from(data).toString(),
-									'ssl-target-name-override': org[prop]['server-hostname']
-								});
-								targets.push(eh);
+								if (!channelName) {
+									logger.warn('channelName required for channel event hubs');
+									continue outer;
+								}
+								const peerName = org[prop]['requests'].split('grpc://')[1];
+								let channel = channels[userOrg + ':' + channelName];
+								targets.push(channel.getChannelEventHub(peerName));
 								
 								continue outer;
 							}
@@ -210,8 +211,8 @@ var newPeers = function(urls) {
 	return newRemotes(urls, true);
 };
 
-var newEventHubs = function(urls, org) {
-	return newRemotes(urls, false, org);
+var newEventHubs = function(urls, org, channelName) {
+	return newRemotes(urls, false, org, channelName);
 };
 
 var getMspID = function(org) {

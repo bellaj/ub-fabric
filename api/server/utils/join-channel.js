@@ -59,14 +59,8 @@ var joinChannel = function(channelName, peers, username, org) {
 		for (let key in ORGS[org]) {
 			if (ORGS[org].hasOwnProperty(key)) {
 				if (key.indexOf('peer') === 0) {
-					let data = fs.readFileSync(path.join(__dirname, ORGS[org][key][
-						'tls_cacerts'
-					]));
-					let eh = client.newEventHub();
-					eh.setPeerAddr(ORGS[org][key].events, {
-						pem: Buffer.from(data).toString(),
-						'ssl-target-name-override': ORGS[org][key]['server-hostname']
-					});
+					const peerName = ORGS[org][key].requests.split('grpc://')[1];
+					let eh = channel.getChannelEventHub(peerName);
 					eh.connect();
 					eventhubs.push(eh);
 					allEventhubs.push(eh);

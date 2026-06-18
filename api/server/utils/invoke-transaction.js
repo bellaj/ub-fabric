@@ -76,9 +76,9 @@ function invokeChaincode(peersUrls, channelName, chaincodeName, fcn, args, usern
 			if (username == helper.getRUsername()) {
 				var regulatorOrg = helper.bankOrgMapping[username];
 				var regulatorPeerUrl = ORGS[regulatorOrg].orgPeers;
-				var eventhubs = helper.newEventHubs(regulatorPeerUrl, regulatorOrg);
+				var eventhubs = helper.newEventHubs(regulatorPeerUrl, regulatorOrg, channelName);
 			} else {
-				var eventhubs = helper.newEventHubs(peersUrls, org);
+				var eventhubs = helper.newEventHubs(peersUrls, org, channelName);
 			}
 			
 			for (let key in eventhubs) {
@@ -97,10 +97,10 @@ function invokeChaincode(peersUrls, channelName, chaincodeName, fcn, args, usern
 						eh.disconnect();
 
 						if (code !== 'VALID') {
-							logger.error( 'Transaction ' + channelName + ' ' + fcn + ' ' + transactionID + ' was invalid on ' + eh._ep._endpoint.addr + ', code = ' + code);
+							logger.error( 'Transaction ' + channelName + ' ' + fcn + ' ' + transactionID + ' was invalid, code = ' + code);
 							reject();
 						} else {
-							logger.info( 'Committed ' + channelName + ' ' + fcn + ' ' + transactionID + ' on peer ' + eh._ep._endpoint.addr);
+							logger.info( 'Committed ' + channelName + ' ' + fcn + ' ' + transactionID);
 							resolve();
 						}
 					});
