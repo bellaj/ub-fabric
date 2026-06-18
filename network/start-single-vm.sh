@@ -37,6 +37,7 @@ docker build -t ubin-fabric-ccenv:2.5 -f docker/ccenv.Dockerfile docker/
 docker build -t ubin-fabric-baseos:2.5 -f docker/baseos.Dockerfile docker/
 
 cd "${SCRIPT_DIR}"
+mkdir -p "${REPO_ROOT}/api/scripts/.packages"
 docker stack rm ubin 2>/dev/null || true
 sleep 8
 docker stack deploy -c docker-compose.yaml ubin
