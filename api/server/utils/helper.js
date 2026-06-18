@@ -392,8 +392,15 @@ var whoamilist = function(){
 }
 
 function whoami(){
-	Object.keys(ORGS)[1];
-	//reverse json mapping
+	var bankArg = process.argv[2];
+	if (bankArg) {
+		for (var bic in bankOrgMapping) {
+			if (bic.toLowerCase().indexOf(bankArg.toLowerCase()) !== -1) {
+				return bic;
+			}
+		}
+	}
+	// legacy fallback when argv not set
 	for (var i = 0; i < Object.keys(bankOrgMapping).length ; i++){
 		if ( bankOrgMapping[Object.keys(bankOrgMapping)[i]] ==  Object.keys(ORGS)[1] ) {
 			return Object.keys(bankOrgMapping)[i];
