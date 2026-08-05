@@ -56,6 +56,12 @@ function createChannel (req, res) {
 		res.json(getErrorMessage('\'channelConfigPath\''));
 		return;
 	}
+	try {
+		channelConfigPath = channels.resolveChannelConfigPath(channelConfigPath);
+	} catch (err) {
+		res.json(getErrorMessage('\'channelConfigPath\''));
+		return;
+	}
 
 	channels.createChannel(channelName, channelConfigPath, req.body.username, req.body.orgname)
 	.then(function(message) {

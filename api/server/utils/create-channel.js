@@ -4,14 +4,51 @@ var path = require('path');
 var config = require('../config.json');
 var helper = require('./helper.js');
 var logger = helper.getLogger('Create-Channel');
+
+var ARTIFACTS_ROOT = path.resolve(__dirname, '../artifacts');
+
+/**
+ * Resolve channelConfigPath under server/artifacts only.
+ * Accepts legacy forms like "../artifacts/channel/x.tx" or "channel/x.tx",
+ * or an absolute path already inside artifacts. Rejects traversal and non-.tx files.
+ */
+function resolveChannelConfigPath(channelConfigPath) {
+	if (typeof channelConfigPath !== 'string' || !channelConfigPath) {
+		throw new Error('Invalid channelConfigPath');
+	}
+	var resolved;
+	if (path.isAbsolute(channelConfigPath)) {
+		resolved = path.resolve(channelConfigPath);
+	} else {
+		var relative = channelConfigPath.replace(/\\/g, '/');
+		if (relative.indexOf('../artifacts/') === 0) {
+			relative = relative.substring('../artifacts/'.length);
+		} else if (relative.indexOf('artifacts/') === 0) {
+			relative = relative.substring('artifacts/'.length);
+		}
+		if (path.isAbsolute(relative) || relative.split('/').indexOf('..') !== -1) {
+			throw new Error('Invalid channelConfigPath');
+		}
+		resolved = path.resolve(ARTIFACTS_ROOT, relative);
+	}
+	var fromRoot = path.relative(ARTIFACTS_ROOT, resolved);
+	if (!fromRoot || fromRoot === '..' || fromRoot.indexOf('..' + path.sep) === 0 || path.isAbsolute(fromRoot)) {
+		throw new Error('Invalid channelConfigPath');
+	}
+	if (path.extname(resolved) !== '.tx') {
+		throw new Error('Invalid channelConfigPath');
+	}
+	return resolved;
+}
+
 //Attempt to send a request to the orderer with the sendCreateChain method
 var createChannel = function(channelName, channelConfigPath, username, orgName) {
 	logger.debug('\n====== Creating Channel \'' + channelName + '\' ======\n');
 	var client = helper.getClientForOrg(orgName);
 	var channel = helper.getChannelForOrg(orgName + ':' + channelName);
 
-	// read in the envelope for the channel config raw bytes
-	var envelope = fs.readFileSync(path.join(__dirname, channelConfigPath));
+	// read in the envelope for the channel config raw bytes (path constrained to artifacts/)
+	var envelope = fs.readFileSync(resolveChannelConfigPath(channelConfigPath));
 	// extract the channel config bytes from the envelope to be signed
 	var channelConfig = client.extractChannelConfig(envelope);
 
@@ -57,3 +94,4 @@ var createChannel = function(channelName, channelConfigPath, username, orgName) 
 };
 
 exports.createChannel = createChannel;
+exports.resolveChannelConfigPath = resolveChannelConfigPath;
