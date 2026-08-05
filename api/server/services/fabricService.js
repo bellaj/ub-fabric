@@ -59,7 +59,7 @@ function createChannel (req, res) {
 
 	channels.createChannel(channelName, channelConfigPath, req.body.username, req.body.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 // Join Channel
@@ -80,7 +80,7 @@ function joinChannel (req, res) {
 
 	join.joinChannel(channelName, peers, req.body.username, req.body.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 // Install chaincode on target peers
@@ -113,7 +113,7 @@ function installChaincode(req, res) {
 
 	install.installChaincode(peers, chaincodeName, chaincodePath, chaincodeVersion, req.body.username, req.body.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 // Instantiate chaincode on target peers
@@ -152,7 +152,7 @@ function instantiateChaincode(req, res) {
 	}
 	instantiate.instantiateChaincode(peers, channelName, chaincodeName, chaincodeVersion, functionName, args, req.body.username, req.body.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 // Upgrade chaincode on target peers
@@ -191,7 +191,7 @@ function upgradeChaincode(req, res) {
 	}
 	upgrade.upgradeChaincode(peers, channelName, chaincodeName, chaincodeVersion, functionName, args, req.body.username, req.body.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 // Invoke transaction on chaincode on target peers
@@ -229,7 +229,7 @@ function invokeChaincode(req, res) {
 
 	invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.body.username, req.body.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 // Query on chaincode on target peers
@@ -268,7 +268,7 @@ function queryByChaincode(req, res) {
 
 	query.queryChaincode(peer, channelName, chaincodeName, args, fcn, req.query.username, req.query.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 //  Query Get Block by BlockNumber
@@ -286,7 +286,7 @@ function queryBlockNumber(req, res) {
 
 	query.getBlockByNumber(peer, blockId, req.query.username, req.query.orgname, req.params.channelName)
 		.then(function(message) {
-			res.send(message);
+			res.json(message);
 		});
 }
 // Query Get Transaction by Transaction ID
@@ -305,7 +305,7 @@ function getTransactionByID(req, res) {
 	
 	query.getTransactionByID(peer, trxnId, req.query.username, req.query.orgname, channelName)
 		.then(function(message) {
-			res.send(message);
+			res.json(message);
 		});
 }
 // Query Get Block by Hash
@@ -321,7 +321,7 @@ function getBlockByHash(req, res) {
 
 	query.getBlockByHash(peer, hash, req.query.username, req.query.orgname, req.params.channelName).then(
 		function(message) {
-			res.send(message);
+			res.json(message);
 		});
 }
 //Query for Channel Information
@@ -338,7 +338,7 @@ function queryChannelInfo(req, res) {
 	logger.debug('channelname: '+ req.params.channelname);
 	query.getChainInfo("peer0", bankName , orgname, channelname ).then(
 		function(message) {
-			res.send(message);
+			res.json(message);
 		});
 }
 // Query to fetch all Installed/instantiated chaincodes
@@ -356,7 +356,7 @@ function getAllChaincodes(req, res) {
 	
 	query.getInstalledChaincodes(peer, installType, req.query.username, req.query.orgname)
 	.then(function(message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 // Query to fetch channels
@@ -370,7 +370,7 @@ function getChannels(req, res) {
 	query.getChannels("peer0", bankName , orgname )
 	.then(function(
 		message) {
-		res.send(message);
+		res.json(message);
 	});
 }
 

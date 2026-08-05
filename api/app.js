@@ -12,10 +12,13 @@ var app = express();
 var responseTime = require('response-time');
 
 var cors = require('cors');
+var crypto = require('crypto');
 var config = require('./server/config.json');
 
 var host = process.env.HOST || config.host;
 var port = process.env.PORT || config.port;
+// Prefer SESSION_SECRET; otherwise generate an ephemeral value for local startup.
+var sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 
 // Set configuration
 app.options('*', cors());
@@ -25,13 +28,13 @@ app.use(bodyParser.urlencoded({
 	extended: false
 }));
 app.use(responseTime())
-app.set('secret', 'thisismysecret');
+app.set('secret', sessionSecret);
 
 // Start server
 app.set('port', process.env.PORT || 8080);
 app.disable('x-powered-by')
 app.disable('etag')
-app.use(session({ secret: 'thisismysecret',resave: true, saveUninitialized: true, cookie: { maxAge: 60000 }}))
+app.use(session({ secret: sessionSecret, resave: true, saveUninitialized: true, cookie: { maxAge: 60000 }}))
 var server = http.createServer(app).listen(port, function() {});
 logger.info('****************** SERVER STARTED ************************');
 logger.info('**************  http://' + host + ':' + port +
